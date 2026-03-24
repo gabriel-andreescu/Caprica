@@ -205,7 +205,7 @@ bool parseCommandLineArguments(int argc, char* argv[], caprica::CapricaJobManage
       ("ensure-betaonly-debugonly-dont-escape", po::bool_switch()->default_value(false),
         "Ensure values returned from BetaOnly and DebugOnly functions don't escape, as that will cause invalid code generation.")
       ("disable-implicit-conversion-from-none", po::bool_switch()->default_value(false),
-        "Disable implicit conversion from None in most situations where the use of None likely wasn't the author's intention.")
+        "Disable implicit conversion from None in most situations where the use of None likely wasn't the author's intention.");
 
     po::options_description skyrimCompatibilityDesc("Skyrim compatibility (default true with '--game=skyrim')");
     skyrimCompatibilityDesc.add_options()
