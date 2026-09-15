@@ -66,6 +66,21 @@ Function DropWall(ObjectReference WallEffect)
 EndFunction
 )";
 
+constexpr const char* SKYRIM_FAKE_FLAGS_FILE =
+    R"(Flag Hidden 0 { Script Property }
+Flag Conditional 1 { Script Variable }
+)";
+
+constexpr const char* FALLOUT4_FAKE_FLAGS_FILE =
+    R"(Flag Hidden 0 { Script Property StructVar }
+Flag Conditional 1 { Script Variable }
+Flag Default 2 { Script }
+Flag CollapsedOnRef 3 { Group }
+Flag CollapsedOnBase 4 { Group }
+Flag Collapsed CollapsedOnRef & CollapsedOnBase
+Flag Mandatory 5 { Property }
+)";
+
 constexpr const char* STARFIELD_FAKE_FLAGS_FILE =
 R"(// Starfield flags file, by NikitaLita
 // This file is conjecture, based on the userflags set by the base starfield game scripts.
@@ -140,9 +155,16 @@ size_t FakeScripts::getSizeOfFakeScript(const identifier_ref& name, GameID game)
 }
 
 identifier_ref FakeScripts::getFakeFlagsFile(GameID game) {
-  if (game != GameID::Starfield)
-    return {};
-  return STARFIELD_FAKE_FLAGS_FILE;
+  switch (game) {
+    case GameID::Skyrim:
+      return SKYRIM_FAKE_FLAGS_FILE;
+    case GameID::Fallout4:
+      return FALLOUT4_FAKE_FLAGS_FILE;
+    case GameID::Starfield:
+      return STARFIELD_FAKE_FLAGS_FILE;
+    default:
+      return {};
+  }
 }
 
 
