@@ -4,10 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ "master" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
-  release:
-    types: [published]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -80,6 +79,15 @@ jobs:
     env:
       RELEASE_TAG: ${{ github.ref_name }}
     steps:
+      - uses: actions/checkout@v7
+      - name: Read release version
+        id: version
+        run: echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
+      - name: Read changelog
+        id: changelog
+        uses: mindsers/changelog-reader-action@1faaf50aa09d5793d9a100819973df801febfb31 # v2.4.0
+        with:
+          version: ${{ steps.version.outputs.version }}
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -92,4 +100,5 @@ jobs:
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$RELEASE_TAG" "artifacts/${PROJECT_NAME}-${RELEASE_TAG}.zip" --repo "$GITHUB_REPOSITORY"
+          RELEASE_NOTES: ${{ steps.changelog.outputs.changes_file }}
+        run: gh release create "$RELEASE_TAG" "artifacts/${PROJECT_NAME}-${RELEASE_TAG}.zip" --verify-tag --title "Caprica $RELEASE_TAG" --notes-file "$RELEASE_NOTES" --repo "$GITHUB_REPOSITORY"
