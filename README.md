@@ -30,6 +30,10 @@ And, because it can, Caprica allows a few things that the CK compiler does not. 
 
 Caprica uses built-in user flags for Skyrim, Fallout 4 and Starfield when `--flags` is omitted. Use `--flags <file>` to supply your own definitions.
 
+# Tests
+
+See [Compiler tests](tests/README.md).
+
 # Language Extensions
 ### For
 The statement whose absence has most annoyed Papyrus users working with arrays. Fear not, for your cries have been heard, and your calls answered! The behaviour of it is the same as in [VB.Net](https://msdn.microsoft.com/en-us/library/5z06z1kb.aspx) with the difference that `<identifier>` will never implicitly be defined. If you want to declare it as a variable, you must prefix it with a type.

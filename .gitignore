@@ -12,6 +12,9 @@ cmake-build-*
 
 test_compile/
 /scratch/
+/.venv/
+.pytest_cache/
+__pycache__/
 
 
 # vcpkg
