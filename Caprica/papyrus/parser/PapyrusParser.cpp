@@ -360,7 +360,12 @@ Return:
 PapyrusStructMember*
 PapyrusParser::parseStructMember(PapyrusScript*, PapyrusObject*, PapyrusStruct* struc, PapyrusType&& tp) {
   auto mem = alloc->make<PapyrusStructMember>(cur.location, std::move(tp), struc);
-  mem->name = expectConsumeIdentRef();
+  if (cur.type == TokenType::kParent || cur.type == TokenType::kSelf) {
+    mem->name = cur.type == TokenType::kParent ? "parent" : "self";
+    consume();
+  } else {
+    mem->name = expectConsumeIdentRef();
+  }
 
   // Needed because None is a valid default value, and we shouldn't
   // be erroring on it.
@@ -1070,7 +1075,14 @@ expressions::PapyrusExpression* PapyrusParser::parseDotExpression(PapyrusFunctio
       while (cur.type == TokenType::Dot) {
         auto maExpr = alloc->make<expressions::PapyrusMemberAccessExpression>(consumeLocation());
         maExpr->baseExpression = expr;
-        maExpr->accessExpression = parseFuncOrIdExpression(func);
+        if (cur.type == TokenType::kParent || cur.type == TokenType::kSelf) {
+          maExpr->accessExpression = alloc->make<expressions::PapyrusIdentifierExpression>(
+              cur.location,
+              PapyrusIdentifier::Unresolved(cur.location, cur.type == TokenType::kParent ? "parent" : "self"));
+          consume();
+        } else {
+          maExpr->accessExpression = parseFuncOrIdExpression(func);
+        }
 
         if (cur.type == TokenType::LSquare) {
           auto aiExpr = alloc->make<expressions::PapyrusArrayIndexExpression>(consumeLocation());
