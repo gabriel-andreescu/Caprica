@@ -597,14 +597,11 @@ void PapyrusCompilationContext::RenameImports(CapricaJobManager* jobManager) {
   }
 
   // remove the children
-  for (auto it = rootNamespace.children.begin(); it != rootNamespace.children.end(); ++it) {
-    if ((*it).first[0] != '!')
-      continue;
-    rootNamespace.children.erase(it);
-    it = rootNamespace.children.begin();
-    if (it == rootNamespace.children.end())
-      break;
-  }
+  for (auto it = rootNamespace.children.begin(); it != rootNamespace.children.end();)
+    if ((*it).first[0] == '!')
+      it = rootNamespace.children.erase(it);
+    else
+      ++it;
 }
 
 bool PapyrusCompilationContext::tryFindType(const identifier_ref& baseNamespace,
