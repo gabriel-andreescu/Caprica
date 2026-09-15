@@ -14,8 +14,8 @@ def test_parent_and_self_struct_members(compile_script):
         assert match, f"Missing function: {name}\n{assembly}"
         return match[1]
 
-    get_member = r"\bstructget\s+\S+\s+value\s+(\w+)"
-    set_member = r"\bstructset\s+value\s+(\w+)"
+    get_member = r"\bstructget\s+\S+\s+\S+\s+(\w+)"
+    set_member = r"\bstructset\s+\S+\s+(\w+)"
     assert set(re.findall(get_member, body("read"))) == {"parent", "self"}
     assert set(re.findall(set_member, body("write"))) == {"parent", "self"}
     assert set(re.findall(get_member, body("increment"))) == {"parent", "self"}
