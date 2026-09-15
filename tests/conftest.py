@@ -18,16 +18,17 @@ def compiler(pytestconfig):
 
 @pytest.fixture
 def compile_script(compiler, tmp_path):
-    def compile(source, *, game):
+    def compile(source, *, game, pcompiler=False):
         result = subprocess.run(
             [
                 str(compiler),
-                str(source),
+                source.name if pcompiler else str(source),
                 f"--game={game}",
                 f"--import={source.parent}",
                 f"--output={tmp_path}",
                 "--ignorecwd",
                 "--dump-asm",
+                *(["--pcompiler"] if pcompiler else []),
             ],
             cwd=tmp_path,
             capture_output=True,
