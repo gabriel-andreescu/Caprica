@@ -157,7 +157,7 @@ bool parseCommandLineArguments(int argc, char* argv[], caprica::CapricaJobManage
       ("import,i", po::value<std::vector<std::string>>()->composing(),
         "Set the compiler's import directories.")
       ("flags,f", po::value<std::string>(),
-        "Set the file defining the user flags.")
+        "Set the file defining the user flags. Defaults are provided for Skyrim, Fallout 4 and Starfield.")
       ("output,o", po::value<std::string>(),
         "Set the directory to save compiler output to.")
       ("optimize,op,O",
@@ -615,6 +615,10 @@ bool parseCommandLineArguments(int argc, char* argv[], caprica::CapricaJobManage
     std::string flagsPath;
     if (!flags.empty()) {
       flagsPath = findFlags(flags, progamBasePath, baseOutputDir);
+    } else if (conf::Papyrus::game == GameID::Skyrim) {
+      flagsPath = "fake://Skyrim/TESV_Papyrus_Flags.flg";
+    } else if (conf::Papyrus::game == GameID::Fallout4) {
+      flagsPath = "fake://Fallout4/Institute_Papyrus_Flags.flg";
     } else if (conf::Papyrus::game == GameID::Starfield) {
       std::cout << "No flags specified, Using default Starfield flags file." << std::endl;
       flagsPath = "fake://Starfield/Starfield_Papyrus_Flags.flg";
