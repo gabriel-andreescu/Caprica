@@ -52,7 +52,6 @@ struct PapyrusFunctionCallExpression final : public PapyrusExpression {
   virtual PapyrusFunctionCallExpression* asFunctionCallExpression() override { return this; }
 
 private:
-  bool isPoisonedReturn { false };
   bool shouldEmit { true };
 };
 

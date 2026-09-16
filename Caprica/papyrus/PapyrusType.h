@@ -84,11 +84,6 @@ struct PapyrusType final {
   }
 
   static PapyrusType None(CapricaFileLocation loc) { return PapyrusType(Kind::None, loc); }
-  static PapyrusType PoisonedNone(CapricaFileLocation loc, const PapyrusType& poisonSource) {
-    auto pt = PapyrusType(Kind::None, loc);
-    pt.poisonState = poisonSource.poisonState;
-    return pt;
-  }
   static PapyrusType Bool(CapricaFileLocation loc) { return PapyrusType(Kind::Bool, loc); }
   static PapyrusType Float(CapricaFileLocation loc) { return PapyrusType(Kind::Float, loc); }
   static PapyrusType Int(CapricaFileLocation loc) { return PapyrusType(Kind::Int, loc); }
