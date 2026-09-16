@@ -387,6 +387,10 @@ void PapyrusResolutionContext::addLocalVariable(statements::PapyrusDeclareStatem
   for (auto is : localVariableScopeStack) {
     for (auto n : is->locals) {
       if (idEq(n->name, local->name)) {
+        if (is != localVariableScopeStack.top() &&
+            local->location.startOffset < n->declareStatement->location.startOffset) {
+          continue;
+        }
         reportingContext.error(local->location,
                                "Attempted to redefined '{}' which was already defined in a parent scope!",
                                local->name);
@@ -456,17 +460,23 @@ PapyrusIdentifier PapyrusResolutionContext::tryResolveIdentifier(const PapyrusId
   // locals get resolved dead last
   // This handles local var resolution.
   if (function) {
+    const LocalScopeVariableNode* local = nullptr;
     for (auto stack : localVariableScopeStack) {
       for (auto n : stack->locals) {
         if (idEq(n->name, ident.res.name)) {
-          if (conf::Papyrus::game == GameID::Skyrim && conf::Skyrim::skyrimAllowLocalUseBeforeDeclaration &&
-              ident.location.startOffset < n->declareStatement->location.startOffset) {
-            reportingContext.warning_W7003_Skyrim_Local_Use_Before_Declaration(ident.location,
-                                                                               ident.res.name);
-          }
-          resolvedIds.push_back(PapyrusIdentifier::DeclStatement(ident.location, n->declareStatement));
+          local = n;
+          break;
         }
       }
+      if (local)
+        break;
+    }
+    if (local) {
+      if (conf::Papyrus::game == GameID::Skyrim && conf::Skyrim::skyrimAllowLocalUseBeforeDeclaration &&
+          ident.location.startOffset < local->declareStatement->location.startOffset) {
+        reportingContext.warning_W7003_Skyrim_Local_Use_Before_Declaration(ident.location, ident.res.name);
+      }
+      resolvedIds.push_back(PapyrusIdentifier::DeclStatement(ident.location, local->declareStatement));
     }
   }
 
