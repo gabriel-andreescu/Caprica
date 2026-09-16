@@ -4,8 +4,10 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <exception>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 namespace caprica {
 
@@ -28,6 +30,7 @@ private:
   std::atomic<bool> runningLock { false };
   std::condition_variable ranCondition;
   std::mutex ranMutex;
+  std::exception_ptr failure;
 
   friend struct CapricaJobManager;
   std::atomic<CapricaJob*> next { nullptr };
@@ -36,6 +39,7 @@ private:
 };
 
 struct CapricaJobManager final {
+  ~CapricaJobManager();
   void startup(size_t workerCount);
   // Wait for all workers to shutdown
   void awaitShutdown();
@@ -53,7 +57,9 @@ private:
   } defaultJob;
   std::atomic<CapricaJob*> front { &defaultJob };
   std::atomic<CapricaJob*> back { &defaultJob };
-  std::mutex queueAvailabilityMutex;
+  std::vector<std::thread> workers;
+  std::mutex failureMutex;
+  std::exception_ptr failure;
   std::condition_variable queueCondition;
   std::atomic<size_t> queuedItemCount { 0 };
   std::atomic<size_t> waiterCount { 0 };

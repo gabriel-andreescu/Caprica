@@ -7,7 +7,9 @@ namespace caprica {
 void CapricaJob::await() {
   if (!tryRun()) {
     std::unique_lock<std::mutex> ranLock { ranMutex };
-    ranCondition.wait(ranLock, [this] { return hasRan.load(std::memory_order_consume); });
+    ranCondition.wait(ranLock, [this] { return hasRan.load(std::memory_order_acquire); });
+    if (failure)
+      std::rethrow_exception(failure);
   }
 }
 bool CapricaJob::hasRun() {
@@ -18,7 +20,11 @@ bool CapricaJob::tryRun() {
     bool r = runningLock.load(std::memory_order_acquire);
     if (!r && runningLock.compare_exchange_strong(r, true)) {
       std::unique_lock<std::mutex> ranLock { ranMutex };
-      run();
+      try {
+        run();
+      } catch (...) {
+        failure = std::current_exception();
+      }
       hasRan.store(true, std::memory_order_release);
       ranLock.unlock();
       ranCondition.notify_all();
@@ -27,25 +33,27 @@ bool CapricaJob::tryRun() {
       return false;
     }
   }
+  if (failure)
+    std::rethrow_exception(failure);
   return true;
+}
+
+CapricaJobManager::~CapricaJobManager() {
+  stopWorkers.store(true, std::memory_order_release);
+  queueCondition.notify_all();
+  awaitShutdown();
 }
 
 void CapricaJobManager::startup(size_t initialWorkerCount) {
   defaultJob.await();
-  for (size_t i = workerCount; i < initialWorkerCount; i++) {
-    std::thread thr { [this] {
-      this->workerMain();
-    } };
-    thr.detach();
-  }
+  for (size_t i = workers.size(); i < initialWorkerCount; i++)
+    workers.emplace_back([this] { this->workerMain(); });
 }
 
 void CapricaJobManager::awaitShutdown() {
-  std::mutex notARealMutex {};
-  while (workerCount != 0) {
-    std::unique_lock<std::mutex> lk { notARealMutex };
-    queueCondition.wait_for(lk, std::chrono::milliseconds(20), [&] { return workerCount == 0; });
-  }
+  for (auto& worker : workers)
+    worker.join();
+  workers.clear();
 }
 
 bool CapricaJobManager::tryDeque(CapricaJob** retJob) {
@@ -91,6 +99,9 @@ void CapricaJobManager::queueJob(CapricaJob* job) {
 
 void CapricaJobManager::enjoin() {
   workerMain();
+  awaitShutdown();
+  if (failure)
+    std::rethrow_exception(failure);
 }
 
 void CapricaJobManager::workerMain() {
@@ -101,8 +112,15 @@ void CapricaJobManager::workerMain() {
   workerCount++;
 StartOver:
   CapricaJob* job = nullptr;
-  while (tryDeque(&job))
-    job->tryRun();
+  while (tryDeque(&job)) {
+    try {
+      job->tryRun();
+    } catch (...) {
+      std::lock_guard<std::mutex> lock { failureMutex };
+      if (!failure)
+        failure = std::current_exception();
+    }
+  }
 
   // Don't stop until all jobs have been added.
   if (stopWorkers.load(std::memory_order_consume)) {
