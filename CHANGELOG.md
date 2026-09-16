@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Fix CK-compatible compilation rejecting bare `Scriptname` declarations with Windows line endings.
 - Fix a crash when optimization removes redundant instructions.
+- Fix Skyrim compilation rejecting a block-local variable when the same name is declared later in an outer scope.
 
 ## [2026.9.16] - 2026-09-16
 
