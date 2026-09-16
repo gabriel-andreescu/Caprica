@@ -18,7 +18,7 @@ def compiler(pytestconfig):
 
 @pytest.fixture
 def compile_script(compiler, tmp_path):
-    def compile(source, *, game, pcompiler=False, optimize=False, release=False, final=False):
+    def compile(source, *, game, pcompiler=False, optimize=False, release=False, final=False, parallel=False):
         result = subprocess.run(
             [
                 str(compiler),
@@ -32,6 +32,7 @@ def compile_script(compiler, tmp_path):
                 *(["--optimize"] if optimize else []),
                 *(["--release"] if release else []),
                 *(["--final"] if final else []),
+                *(["--parallel-compile"] if parallel else []),
             ],
             cwd=tmp_path,
             capture_output=True,
