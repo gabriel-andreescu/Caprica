@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Fix CK-compatible compilation rejecting bare `Scriptname` declarations with Windows line endings.
+- Fix a crash when optimization removes redundant instructions.
 
 ## [2026.9.16] - 2026-09-16
 
