@@ -18,7 +18,7 @@ def compiler(pytestconfig):
 
 @pytest.fixture
 def compile_script(compiler, tmp_path):
-    def compile(source, *, game, pcompiler=False, optimize=False):
+    def compile(source, *, game, pcompiler=False, optimize=False, release=False, final=False):
         result = subprocess.run(
             [
                 str(compiler),
@@ -30,6 +30,8 @@ def compile_script(compiler, tmp_path):
                 "--dump-asm",
                 *(["--pcompiler"] if pcompiler else []),
                 *(["--optimize"] if optimize else []),
+                *(["--release"] if release else []),
+                *(["--final"] if final else []),
             ],
             cwd=tmp_path,
             capture_output=True,
