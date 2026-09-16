@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fix a crash when optimization removes redundant instructions.
 - Fix Skyrim compilation rejecting a block-local variable when the same name is declared later in an outer scope.
 - Fix compilation of DebugOnly and BetaOnly return values, including when their calls are removed in release or final mode.
+- Fix crashes when compilation or import preparation reports an error.
 
 ## [2026.9.16] - 2026-09-16
 
