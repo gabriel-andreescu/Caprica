@@ -391,36 +391,36 @@ void parseUserFlags(std::string &&flagsPath) {
 
 }
 
-int main(int argc, char *argv[]) {
-  caprica::CapricaJobManager jobManager{};
-  auto startParse = std::chrono::high_resolution_clock::now();
-  if (!caprica::parseCommandLineArguments(argc, argv, &jobManager)) {
-    caprica::CapricaReportingContext::breakIfDebugging();
-    return -1;
-  }
-  if (conf::General::compileInParallel)
-    jobManager.startup((uint32_t) std::thread::hardware_concurrency());
-
-  caprica::papyrus::PapyrusCompilationContext::RenameImports(&jobManager);
-  caprica::CapricaStats::outputImportedCount();
-
-  auto endParse = std::chrono::high_resolution_clock::now();
-  if (conf::Performance::dumpTiming) {
-    std::cout << "Command Line Arg Parse: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(endParse - startParse).count() << "ms"
-              << std::endl;
-  }
-
-  auto startRead = std::chrono::high_resolution_clock::now();
-  if (conf::Performance::performanceTestMode)
-    caprica::papyrus::PapyrusCompilationContext::awaitRead();
-  auto endRead = std::chrono::high_resolution_clock::now();
-  if (conf::Performance::dumpTiming) {
-    std::cout << "Read: " << std::chrono::duration_cast<std::chrono::milliseconds>(endRead - startRead).count() << "ms"
-              << std::endl;
-  }
-
+int main(int argc, char* argv[]) {
   try {
+    caprica::CapricaJobManager jobManager {};
+    auto startParse = std::chrono::high_resolution_clock::now();
+    if (!caprica::parseCommandLineArguments(argc, argv, &jobManager)) {
+      caprica::CapricaReportingContext::breakIfDebugging();
+      return -1;
+    }
+    if (conf::General::compileInParallel)
+      jobManager.startup((uint32_t)std::thread::hardware_concurrency());
+
+    caprica::papyrus::PapyrusCompilationContext::RenameImports(&jobManager);
+    caprica::CapricaStats::outputImportedCount();
+
+    auto endParse = std::chrono::high_resolution_clock::now();
+    if (conf::Performance::dumpTiming) {
+      std::cout << "Command Line Arg Parse: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(endParse - startParse).count() << "ms"
+                << std::endl;
+    }
+
+    auto startRead = std::chrono::high_resolution_clock::now();
+    if (conf::Performance::performanceTestMode)
+      caprica::papyrus::PapyrusCompilationContext::awaitRead();
+    auto endRead = std::chrono::high_resolution_clock::now();
+    if (conf::Performance::dumpTiming) {
+      std::cout << "Read: " << std::chrono::duration_cast<std::chrono::milliseconds>(endRead - startRead).count()
+                << "ms" << std::endl;
+    }
+
     auto startCompile = std::chrono::high_resolution_clock::now();
     caprica::papyrus::PapyrusCompilationContext::doCompile(&jobManager);
     auto endCompile = std::chrono::high_resolution_clock::now();
@@ -430,22 +430,21 @@ int main(int argc, char *argv[]) {
                 << "N/A" /*caprica::CapricaStats::inputFileCount*/ << " files in " << compTime << "ms" << std::endl;
       caprica::CapricaStats::outputStats();
     }
-  } catch (const std::runtime_error &ex) {
+    if (conf::Papyrus::game == caprica::GameID::Starfield) {
+      std::cout << "**** WARNING! ****" << std::endl;
+      std::cout << "The syntax for new features in Starfield (Guard, TryGuard, GetMatchingStructs) is experimental."
+                << std::endl;
+      std::cout << "It should be considered as unstable and subject to change." << std::endl << std::endl;
+      std::cout << "The proper syntax will only be known when the Creation Kit comes out in early 2024," << std::endl;
+      std::cout << "and subsequent releases of Caprica may drop support for this experimental syntax." << std::endl;
+      std::cout << "Be prepared to update your scripts when the final syntax is known." << std::endl << std::endl;
+    }
+
+    return 0;
+  } catch (const std::exception& ex) {
     if (ex.what() != std::string(""))
       std::cout << ex.what() << std::endl;
     caprica::CapricaReportingContext::breakIfDebugging();
     return -1;
   }
-  if (conf::Papyrus::game == caprica::GameID::Starfield) {
-    std::cout << "**** WARNING! ****" << std::endl;
-    std::cout << "The syntax for new features in Starfield (Guard, TryGuard, GetMatchingStructs) is experimental."
-              << std::endl;
-    std::cout << "It should be considered as unstable and subject to change." << std::endl << std::endl;
-    std::cout << "The proper syntax will only be known when the Creation Kit comes out in early 2024," << std::endl;
-    std::cout << "and subsequent releases of Caprica may drop support for this experimental syntax." << std::endl;
-    std::cout << "Be prepared to update your scripts when the final syntax is known." << std::endl << std::endl;
-  }
-
-  jobManager.awaitShutdown();
-  return 0;
 }
