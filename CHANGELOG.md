@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [2026.9.17] - 2026-09-16
+
 ### Fixed
 
 - Fix CK-compatible compilation rejecting bare `Scriptname` declarations with Windows line endings.
@@ -34,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Report custom Skyrim events as warnings instead of errors.
 - Fix single-script Fallout 4 compilation returning success without writing a PEX.
 
-[Unreleased]: https://github.com/gabriel-andreescu/Caprica/compare/v2026.9.16...HEAD
+[Unreleased]: https://github.com/gabriel-andreescu/Caprica/compare/v2026.9.17...HEAD
+[2026.9.17]: https://github.com/gabriel-andreescu/Caprica/compare/v2026.9.16...v2026.9.17
 [2026.9.16]: https://github.com/gabriel-andreescu/Caprica/compare/v2026.9.15...v2026.9.16
 [2026.9.15]: https://github.com/gabriel-andreescu/Caprica/releases/tag/v2026.9.15
